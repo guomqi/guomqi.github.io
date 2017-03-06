@@ -158,7 +158,7 @@
         
   
     <h1 itemprop="name">
-      <a class="article-title" href="/2017/03/02/A-New-Day/">A New Day</a>
+      <a class="article-title" href="/2017/03/02/A-New-Day/">焦点轮播图js代码的优化</a>
     </h1>
   
 
@@ -171,7 +171,47 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        
+        <p>今天写了一遍焦点轮播图发现了2个问题<br>    1.连续快速点左右切换会导致图片和按钮无法对应<br>        在全局增加一个变量来存放图片是否切换的状态<br>        ‘var animated=false;‘<br>        当图片正在切换的时候令<br>        ‘animated=true;‘否则‘animated=false;‘<br>    2.简单的if else改为三目看起来舒服一些<br>        ‘if(index==1){<br>            index=3;<br>        }else{<br>            index-=1;<br>        }‘<br>        改成<br>        ‘index==1?index=3:index-=1;‘<br>    全部代码如下：<br>    ‘<br>window.onload=function(){<br>    var pic=document.getElementById(“pic”);<br>    var picbox=document.getElementById(“pic-box”);<br>    var buttons=document.getElementById(“buttons”);<br>    var span=buttons.getElementsByTagName(“span”);<br>    var prev=document.getElementById(“prev”);<br>    var next=document.getElementById(“next”);<br>    var index=1;<br>    var animated=false;<br>    var timer;<br>    function play(){<br>        timer=setInterval(next.onclick,3000)<br>    }<br>    function stop(){<br>        clearInterval(timer);<br>    }<br>    function animate(offset){<br>        animated=true;<br>        var newleft=parseInt(picbox.style.left)+offset;<br>        var time=500;<br>        var interval=50;<br>        var speed=offset/(time/interval);<br>        (function go(){<br>            if(speed&gt;0&amp;&amp;parseInt(picbox.style.left)<newleft||(speed<0&&parseint(picbox.style.left)>newleft)){<br>                picbox.style.left=parseInt(picbox.style.left)+speed+”px”;<br>                setTimeout(go,interval);<br>            }else{<br>                picbox.style.left=newleft+”px”;<br>                newleft&gt;-1000&amp;&amp;(picbox.style.left=-3000+”px”);<br>                newleft&lt;-3000&amp;&amp;(picbox.style.left=-1000+”px”);<br>                animated=false;<br>            }<br>        })();<br>    }</newleft||(speed<0&&parseint(picbox.style.left)></p>
+<pre><code>function showbutton(){
+        for(var i=0;i&lt;span.length;i++){
+            if(span[i].className==&quot;on&quot;){
+                span[i].className=&quot;&quot;;    
+                break;
+            }
+        }
+        span[index-1].className=&quot;on&quot;;
+}
+for(var i=0;i&lt;span.length;i++){
+    span[i].onclick=function(){
+        var myindex=parseInt(this.getAttribute(&quot;index&quot;));
+        var offset=-1000*(myindex-index);
+        animate(offset);
+        index=myindex;
+        showbutton();    
+    }    
+}
+
+prev.onclick=function(){
+    if(animated){
+        return;
+    }
+    animate(1000);
+    index==1?index=3:index-=1;
+    showbutton();
+}
+next.onclick=function(){
+    if(animated){
+        return;
+    }        
+    animate(-1000);
+    index==3?index=1:index+=1;        
+    showbutton();    
+}
+pic.onmouseover=stop;
+pic.onmouseout=play;
+play();
+</code></pre><p>}<br>‘</p>
+
       
 
       
